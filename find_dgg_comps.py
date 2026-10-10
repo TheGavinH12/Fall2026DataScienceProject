@@ -124,6 +124,12 @@ def season_stats(df):
     for s in range(2014, 2031):
         src = full[full.Season == s] if s in set(full.Season) else full[full.Season == latest]
         stats[s] = (src[FEATS].median(), src[FEATS].mean(), src[FEATS].std(ddof=0).replace(0, 1))
+    # Recruiting describes a high-school class, not on-field play, so it uses ONE fixed scale for all seasons,
+    # built from every back (unranked = 0.80). Scaling it within each season among top-50 recruits only
+    # turned small composite gaps (0.84 vs 0.89) into ~2 standard deviations.
+    star = df.loc[df.usable, "Star Rating"].fillna(0.80)
+    for s in stats:
+        stats[s][1]["Star Rating"], stats[s][2]["Star Rating"] = star.mean(), star.std(ddof=0)
     return stats, latest
 
 def zscore(d, stats):
