@@ -12,7 +12,7 @@ New columns (added at the far right, nothing else changes):
                        Backup  = under 80% of the leader's carries
   Role Source          'PFF all halfbacks' (2014-2025) or 'Sheet backs only' (before 2014)
 
-Why: a backup's stats are capped by his role (Jadarian Price behind Jeremiyah Love).
+Why: a backup's stats are capped by his role (Jadarian Price (Go Hawks) behind Jeremiyah Love).
 The comps model uses RB Role to compare backups with backups and starters with starters.
 """
 import os, re, sys, unicodedata
