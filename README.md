@@ -105,7 +105,7 @@ All tests use only information available at the time: a back's comps can only co
 | Rushing yards only | 0.70 |
 | All categories | **0.78** |
 
-**Full evaluation of the comps engine** (`model_history/evaluate.py`, 753 backs' final college seasons, 2017–2025):
+**Full evaluation of the comps engine** (`evaluate.py`, 753 backs' final college seasons, 2017–2025):
 
 | Model | Rank correlation with actual pick | Drafted vs. undrafted AUC |
 |---|---|---|
@@ -118,7 +118,7 @@ All tests use only information available at the time: a back's comps can only co
 - **Backups behind strong starters.** Drafted backups are missed by about twice as much as starters (Jadarian Price, James Cook, Javonte Williams). Role matching (`--role`) makes the comparison fairer but doesn't fix the draft prediction.
 - **Traits the data can't see.** Saquon Barkley's comps went in Rounds 2–6; he went #2 overall. Athletic testing columns are empty.
 
-The full set of hits, misses and fixes is in `docs/RB_Comps_Case_Log.docx`.
+The full set of hits, misses and fixes is in `RB_Comps_Case_Log.docx`; summary numbers are in `eval_summary_v5.json`.
 
 ---
 
@@ -159,15 +159,25 @@ PFF data begins in 2014, so the model covers 2014 onward.
 ## Repository layout
 
 ```
-├── find_dgg_comps.py        # the comps tool
+The tool
+├── find_dgg_comps.py        # the comps tool (start here)
 ├── dgg_input.csv            # DGG's input row (fill in after his season)
 ├── example_input.csv        # filled example (Bo Jackson 2025)
 ├── role_flags.py            # adds RB role / carry-share columns to the workbook
 ├── export_vectors_tsv.py    # vectors for projector.tensorflow.org
 ├── rb_styles_3d.py          # interactive 3D style map (Plotly)
-├── model_history/           # v1-v5, audits, evaluation
-├── data_collection/         # CFBD data pulls
-└── docs/                    # case log, evaluation summary, screenshots
+
+Model history (run in order: RBcomps -> RBcomp2 -> v3/v4/v5)
+├── RBcomps.py               # v1
+├── RBcomp2.py               # v2
+├── rb_comps_v3.py / rb_comps_v4.py / rb_comps_v5.py
+├── v1Audit.py, v3_check.py, decay_check.py   # experiments behind each decision
+├── evaluate.py              # scores any version on every drafted/undrafted back
+├── show_comps.py            # print one back's comps from a v2-v5 run
+
+Docs
+├── RB_Comps_Case_Log.docx   # hits, misses and fixes
+└── eval_summary_v5.json     # evaluation numbers
 ```
 
 ## Tools
