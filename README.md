@@ -97,7 +97,7 @@ A comp means two backs **produced** the same way in college, not that they'll ha
 | Rushing yards only | 0.70 |
 | All categories | **0.78** |
 
-During development, five earlier versions were each kept or dropped based on held-out tests. That's how strength of schedule, role matching and confidence scores made it in, and how a recency-weighting idea that didn't help overall was left out. In a test on 753 backs' final college seasons, the comps ranked actual draft outcomes far better than rushing yards (0.63 vs 0.29 rank correlation). Known blind spots: top picks are underrated, and backups behind strong starters are missed most often. `RB_Comps_Case_Log.docx` documents the hits and misses.
+During development, five earlier versions were each kept or dropped based on held-out tests. That's how strength of schedule, role matching and confidence scores made it in, and how a recency-weighting idea that didn't help overall was left out. In a test on 753 backs' final college seasons, the comps ranked actual draft outcomes far better than rushing yards (0.63 vs 0.29 rank correlation). 
 
 ---
 
