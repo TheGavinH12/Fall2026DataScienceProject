@@ -1,0 +1,18 @@
+# environment
+.venv/
+.env
+.DS_Store
+__pycache__/
+
+# licensed data (PFF) - never commit
+*.xlsx
+download*.csv
+
+# generated outputs (rebuild with the scripts)
+comps/
+*.tsv
+distance_matrix.csv
+eval_v5.csv
+eval_*.csv
+*.npy
+*.pkl
