@@ -132,9 +132,9 @@ def zscore(d, stats):
         med, mu, sd = stats[int(r.Season)]
         vals = r[FEATS].astype(float)
         miss = [f for f in FEATS if np.isnan(vals[f])]
-        vals = vals.fillna(med)
         if np.isnan(vals["Star Rating"]):
-            vals["Star Rating"] = 0.80     # outside the top-50 RB lists: below every listed rating
+            vals["Star Rating"] = 0.80     # outside the top-50 RB lists: below every listed rating (must run before fillna)
+        vals = vals.fillna(med)
         z = ((vals - mu) / sd).clip(-3, 3)
         w = r.CAR / (r.CAR + SHRINK_K) if r.CAR == r.CAR else 0.5
         for f in RATE: z[f] *= w
@@ -177,19 +177,30 @@ def run(queries, df, allrows, stats, args, exclude_pid=None):
         if exclude_pid is not None: block |= pool.PlayerId.values == exclude_pid
         if args.role and isinstance(q.get("RB Role"), str): block |= pool["RB Role"].values != q["RB Role"]
         d0 = distances(Q[qi:qi + 1], P, weights)[0]; d0[block] = np.inf
-        counts = np.zeros(len(pool))
+        counts = {}
+        pids = pool.PlayerId.values
         for _ in range(RUNS):
             Pn = P + rng.normal(0, 1, P.shape).astype(np.float32) * (0.25 * np.sqrt(150 / car_p))[:, None]
             Qn = Q[qi:qi + 1] + rng.normal(0, 1, (1, P.shape[1])).astype(np.float32) * 0.25 * np.sqrt(150 / max(car_q[qi], 30))
             for ix in (GIDX["Size"] + GIDX["Schedule"] + GIDX["Recruiting"]):     # not noisy
                 Pn[:, ix] = P[:, ix]; Qn[:, ix] = Q[qi:qi + 1, ix]
             dn = distances(Qn, Pn, weights)[0]; dn[block] = np.inf
-            counts[np.argsort(dn)[:args.top]] += 1
-        conf = counts / RUNS
+            # count PLAYERS, not seasons: one comp player can't take two of the top spots
+            seen = []
+            for j in np.argsort(dn):
+                if not np.isfinite(dn[j]) or len(seen) == args.top: break
+                if pids[j] not in seen: seen.append(pids[j])
+            for p in seen: counts[p] = counts.get(p, 0) + 1
         finite = d0[np.isfinite(d0)]
-        order = sorted(np.where(conf > 0)[0], key=lambda j: (-conf[j], d0[j]))[:args.top]
+        # show each comp player at his season closest to the query (noise-free distance)
+        best = {}
+        for j in np.where(np.isfinite(d0))[0]:
+            if pids[j] not in best or d0[j] < d0[best[pids[j]]]: best[pids[j]] = j
+        conf = np.zeros(len(pool))
+        for p, c in counts.items(): conf[best[p]] = c / RUNS
+        order = sorted((best[p] for p in counts), key=lambda j: (-conf[j], d0[j]))[:args.top]
         if len(order) < args.top:
-            order += [j for j in np.argsort(d0) if j not in order][:args.top - len(order)]
+            order += sorted((j for p, j in best.items() if j not in order), key=lambda j: d0[j])[:args.top - len(order)]
         # ----- print -----
         print("\n" + "=" * 92)
         print(f"{q.Player} ({q.get('Team', '')}, {int(q.Season)}): {int(q.CAR)} car, {q.YPC:.1f} ypc"
