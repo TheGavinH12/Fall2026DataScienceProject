@@ -20,7 +20,8 @@ USE
 
 WHAT IT COMPARES (every playing-style column in the workbook; draft/NFL columns are NOT used)
   Size          Height, Weight
-  Efficiency    YPC, Designed Rush YPC, Rush Success Rate, EPA per Rush, PFF Rushing Grade
+  Efficiency    YPC, Designed Rush YPC, Rush Success Rate, EPA per Rush
+  PFF grade     PFF Rushing Grade (its own group with the highest single weight: it sums up every run)
   Run style     Explosive Run Rate, Stuffed Rate (lower is better), PFF Breakaway %,
                 PFF Yards After Contact per Att, Missed Tackles Forced per carry, PFF Elusive Rating
   Production    Carries/game, Rush yards/game, Rush TD/game, Goal-line carry share, RB Carry Share
@@ -48,7 +49,8 @@ warnings.filterwarnings("ignore")
 
 GROUPS = {
     "Size":       ["height_in", "Weight"],
-    "Efficiency": ["YPC", "Designed Rush YPC", "Rush Success Rate", "EPA per Rush", "PFF Rushing Grade"],
+    "Efficiency": ["YPC", "Designed Rush YPC", "Rush Success Rate", "EPA per Rush"],
+    "PFF grade":  ["PFF Rushing Grade"],
     "Run style":  ["Explosive Run Rate (10+ yd)", "stuffed_inv", "PFF Breakaway %", "PFF Yards After Contact per Att",
                    "mtf_rate", "PFF Elusive Rating"],
     "Production": ["car_pg", "yds_pg", "td_pg", "gl_share", "RB Carry Share"],
@@ -56,9 +58,11 @@ GROUPS = {
     "Schedule":   ["strength of schedule"],
     "Recruiting": ["Star Rating"],
 }
-WEIGHTS = {"Size": 0.3, "Efficiency": 1.2, "Run style": 1.2, "Production": 1.0, "Receiving": 1.0,
+# PFF grade is its own group: it sums up every run, and giving it extra weight improved the freshman
+# validation from 0.79 to 0.82 AUC (pff_weight_check.py). 1.24 = its old share (1.2 / 5) + 1.0 extra.
+WEIGHTS = {"Size": 0.3, "Efficiency": 0.96, "PFF grade": 1.24, "Run style": 1.2, "Production": 1.0, "Receiving": 1.0,
            "Schedule": 1.0, "Recruiting": 0.3}
-RATE = set(GROUPS["Efficiency"] + GROUPS["Run style"] + GROUPS["Receiving"])   # shrunk for low carries
+RATE = set(GROUPS["Efficiency"] + GROUPS["PFF grade"] + GROUPS["Run style"] + GROUPS["Receiving"])   # shrunk for low carries
 INPUT_COLS = ["Player", "Season", "Team", "Conference", "Class Year", "Redshirt", "Height", "Weight",
               "CAR", "YDS", "TD", "LONG", "Games Played", "Designed Rush Att", "Designed Rush YPC",
               "Rush Success Rate", "EPA per Rush", "Explosive Run Rate (10+ yd)", "Stuffed Rate", "Goal-Line Carries",
